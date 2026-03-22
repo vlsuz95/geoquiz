@@ -1,0 +1,11 @@
+id,image_name,title,photo_url,lat,lng,category,difficulty,city,country,is_active,looks_like_now
+1,id_1.jpg,22-я и 23-я линии В. О. (04),https://transphoto.org/photo/19/03/71/1903710.jpg,59.936587,30.259054,tramway,3,spb,rus,1,https://yandex.com/maps/-/CPRbaLOb
+2,id_2.jpg,Рабфаковская улица (96),https://transphoto.org/photo/19/33/17/1933174.jpg,59.859219,30.476148,tramway,5,spb,rus,1,https://yandex.com/maps/-/CPRbeJLx
+3,id_3.jpg,Улица Жукова (96),https://transphoto.org/photo/19/33/17/1933177.jpg,59.964998,30.393360,tramway,3,spb,rus,1,https://yandex.com/maps/-/CPRbi42M
+4,id_4.jpg,Университетская и Съездовская,https://transphoto.org/photo/20/60/86/2060863.jpg,59.938296,30.294286,trolleybus,2,spb,rus,1,https://yandex.com/maps/-/CPRbmEJD
+5,id_5.jpg,Труда (02),https://transphoto.org/photo/21/00/37/2100377.jpg,59.932207,30.291784,tramway,2,spb,rus,1,https://yandex.com/maps/-/CPRbmN83
+6,id_6.jpg,Марата (02),https://transphoto.org/photo/22/54/86/2254860.jpg,59.920532,30.342203,tramway,3,spb,rus,1,https://yandex.com/maps/-/CPRbqVpG
+7,id_7.jpg,Троицкая (03),https://transphoto.org/photo/22/54/86/2254864.jpg,59.953668,30.324588,tramway,2,spb,rus,1,https://yandex.com/maps/-/CPRbuBIG
+8,id_8.jpg,16 и 17 линии (96),https://transphoto.org/photo/22/56/65/2256650.jpg,59.944958,30.259328,tramway,4,spb,rus,1,https://yandex.com/maps/-/CPRbuD03
+9,id_9.jpg,Бармалеева,https://transphoto.org/photo/22/57/13/2257135.jpg,59.963275,30.307920,trolleybus,3,spb,rus,1,https://yandex.com/maps/-/CPRby6oV
+10,id_10.jpg,Обуховской Обороны,https://transphoto.org/photo/22/59/05/2259058.jpg,59.874241,30.452918,tramway,5,spb,rus,1,https://yandex.com/maps/-/CPRb5Vid
