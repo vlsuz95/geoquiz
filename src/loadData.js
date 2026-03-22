@@ -1,9 +1,9 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 const filePath = path.join(process.cwd(), "data", "locations_test.csv");
 
-function loadLocations() {
+export function loadLocations() {
   const file = fs.readFileSync(filePath, "utf-8");
 
   const rows = file.trim().split("\n");
@@ -25,5 +25,3 @@ function loadLocations() {
     return value === "true" || value === "1";
   });
 }
-
-module.exports = { loadLocations };

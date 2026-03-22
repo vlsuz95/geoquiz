@@ -1,11 +1,10 @@
-const { getLocationById } = require("../../../src/getLocationById");
-const { calculateDistance } = require("../../../src/calculateDistance");
-const { scoreRound } = require("../../../src/scoreRound");
+import { getLocationById } from "@/src/getLocationById";
+import { calculateDistance } from "@/src/calculateDistance";
+import { scoreRound } from "@/src/scoreRound";
 
 export async function POST(request) {
   try {
     const body = await request.json();
-
     const { id, lat, lng } = body;
 
     if (!id || lat === undefined || lng === undefined) {

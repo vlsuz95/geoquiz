@@ -1,4 +1,4 @@
-const { loadLocations } = require("./loadData");
+import { loadLocations } from "./loadData";
 
 function shuffleArray(array) {
   const result = [...array];
@@ -11,7 +11,7 @@ function shuffleArray(array) {
   return result;
 }
 
-function selectRounds(count = 5) {
+export function selectRounds(count = 5) {
   const locations = loadLocations();
 
   if (locations.length < count) {
@@ -23,8 +23,3 @@ function selectRounds(count = 5) {
   const shuffled = shuffleArray(locations);
   return shuffled.slice(0, count);
 }
-
-const rounds = selectRounds(5);
-console.log("ROUNDS:", rounds);
-
-module.exports = { selectRounds };

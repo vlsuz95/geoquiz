@@ -1,8 +1,6 @@
-const { loadLocations } = require("./loadData");
+import { loadLocations } from "./loadData";
 
-function getLocationById(id) {
+export function getLocationById(id) {
   const locations = loadLocations();
   return locations.find((item) => String(item.id) === String(id));
 }
-
-module.exports = { getLocationById };

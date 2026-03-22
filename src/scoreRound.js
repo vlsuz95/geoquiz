@@ -1,4 +1,4 @@
-function scoreRound(distanceKm) {
+export function scoreRound(distanceKm) {
   if (distanceKm <= 0.1) return 5000;
   if (distanceKm <= 0.5) return 4500;
   if (distanceKm <= 1) return 4000;
@@ -8,5 +8,3 @@ function scoreRound(distanceKm) {
   if (distanceKm <= 20) return 500;
   return 0;
 }
-
-module.exports = { scoreRound };

@@ -2,7 +2,7 @@ function toRadians(degrees) {
   return (degrees * Math.PI) / 180;
 }
 
-function calculateDistance(lat1, lng1, lat2, lng2) {
+export function calculateDistance(lat1, lng1, lat2, lng2) {
   const earthRadiusKm = 6371;
 
   const dLat = toRadians(lat2 - lat1);
@@ -19,5 +19,3 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
 
   return earthRadiusKm * c;
 }
-
-module.exports = { calculateDistance };
