@@ -32,6 +32,7 @@ type RoundResult = {
   };
   distanceKm: number;
   score: number;
+  maxScore: number;
   meta?: RoundMeta;
 };
 
