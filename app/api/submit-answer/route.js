@@ -9,7 +9,7 @@ export async function POST(request) {
 
     if (!id || lat === undefined || lng === undefined) {
       return Response.json(
-        { error: "Нужны поля id, lat, lng" },
+        { error: "Нужны поля id, lat и lng" },
         { status: 400 }
       );
     }
@@ -24,6 +24,19 @@ export async function POST(request) {
     const correctLng = Number(location.lng);
     const userLat = Number(lat);
     const userLng = Number(lng);
+    const difficulty = Number(location.difficulty) || 1;
+
+    if (
+      Number.isNaN(correctLat) ||
+      Number.isNaN(correctLng) ||
+      Number.isNaN(userLat) ||
+      Number.isNaN(userLng)
+    ) {
+      return Response.json(
+        { error: "Некорректные координаты" },
+        { status: 400 }
+      );
+    }
 
     const distance = calculateDistance(
       correctLat,
@@ -32,11 +45,13 @@ export async function POST(request) {
       userLng
     );
 
-    const score = scoreRound(distance);
+    const score = scoreRound(distance, difficulty);
 
     return Response.json({
-      id: location.id,
+      id: String(location.id),
       image: location.image_name,
+      difficulty,
+      maxScore: 5000 + 100 * (difficulty - 1),
       correct: {
         lat: correctLat,
         lng: correctLng,
@@ -47,12 +62,18 @@ export async function POST(request) {
       },
       distanceKm: Number(distance.toFixed(2)),
       score,
+      meta: {
+        place: String(location.gt_place || "").trim(),
+        description: String(location.description || "").trim(),
+        year: String(location.year || "").trim(),
+        panoramaUrl: String(location.looks_like_now || "").trim(),
+      },
     });
   } catch (error) {
     return Response.json(
       {
         error: "Ошибка обработки ответа",
-        details: String(error.message || error),
+        details: String(error?.message || error),
       },
       { status: 500 }
     );

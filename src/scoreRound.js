@@ -1,10 +1,28 @@
-export function scoreRound(distanceKm) {
-  if (distanceKm <= 0.1) return 5000;
-  if (distanceKm <= 0.5) return 4500;
-  if (distanceKm <= 1) return 4000;
-  if (distanceKm <= 3) return 3000;
-  if (distanceKm <= 5) return 2000;
-  if (distanceKm <= 10) return 1000;
-  if (distanceKm <= 20) return 500;
-  return 0;
+export function scoreRound(distanceKm, difficulty = 1) {
+  const minDistance = 0.1; // 100 метров
+  const maxDistance = 20; // 20 км
+
+  const maxScore = 5000;
+  const minScore = 10;
+
+  const safeDifficulty = Math.min(5, Math.max(1, Number(difficulty) || 1));
+
+  let baseScore;
+
+  if (distanceKm <= minDistance) {
+    baseScore = maxScore;
+  } else if (distanceKm >= maxDistance) {
+    baseScore = minScore;
+  } else {
+    const logMin = Math.log(minDistance);
+    const logMax = Math.log(maxDistance);
+    const logDistance = Math.log(distanceKm);
+
+    const progress = (logDistance - logMin) / (logMax - logMin);
+    baseScore = Math.round(maxScore - progress * (maxScore - minScore));
+  }
+
+  const difficultyBonus = distanceKm < 1 ? 100 * (safeDifficulty - 1) : 0;
+
+  return baseScore + difficultyBonus;
 }

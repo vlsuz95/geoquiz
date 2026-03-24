@@ -25,19 +25,40 @@ type MapPickerProps = {
   onSelect: (point: Point) => void;
 };
 
-const blueIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+// ✅ Красивые SVG-пины
+function createPinIcon(color: string, symbol: string) {
+  return L.divIcon({
+    className: "",
+    html: `
+      <div style="width: 34px; height: 46px;">
+        <svg width="34" height="46" viewBox="0 0 34 46">
+          <path
+            d="M17 1C8.2 1 1 8.2 1 17c0 11.5 13.6 25.4 15.1 26.9a1.3 1.3 0 0 0 1.8 0C19.4 42.4 33 28.5 33 17 33 8.2 25.8 1 17 1z"
+            fill="${color}"
+            stroke="white"
+            stroke-width="2"
+          />
+          <text
+            x="17"
+            y="22"
+            text-anchor="middle"
+            font-size="18"
+            font-weight="700"
+            fill="white"
+            font-family="Arial, sans-serif"
+          >${symbol}</text>
+        </svg>
+      </div>
+    `,
+    iconSize: [34, 46],
+    iconAnchor: [17, 46],
+  });
+}
 
-const redIcon = L.icon({
-  iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-});
+const userIcon = createPinIcon("#2563eb", "?");
+const correctIcon = createPinIcon("#ef4444", "!");
 
+// 📍 обработка клика
 function ClickHandler({ onSelect }: { onSelect: (point: Point) => void }) {
   useMapEvents({
     click(event) {
@@ -51,6 +72,7 @@ function ClickHandler({ onSelect }: { onSelect: (point: Point) => void }) {
   return null;
 }
 
+// 🔍 авто-зум между точками
 function FitBounds({
   selectedPoint,
   correctPoint,
@@ -113,22 +135,11 @@ export default function MapPicker({
         />
 
         <ClickHandler onSelect={onSelect} />
-
         <FitBounds selectedPoint={selectedPoint} correctPoint={correctPoint} />
 
-        {selectedPoint && (
-          <Marker
-            position={[selectedPoint.lat, selectedPoint.lng]}
-            icon={blueIcon}
-          />
-        )}
+        {selectedPoint && <Marker position={selectedPoint} icon={userIcon} />}
 
-        {correctPoint && (
-          <Marker
-            position={[correctPoint.lat, correctPoint.lng]}
-            icon={redIcon}
-          />
-        )}
+        {correctPoint && <Marker position={correctPoint} icon={correctIcon} />}
 
         {linePositions && (
           <Polyline

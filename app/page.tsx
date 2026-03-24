@@ -12,6 +12,13 @@ type Round = {
   image: string;
 };
 
+type RoundMeta = {
+  place: string;
+  description: string;
+  year: string | number;
+  panoramaUrl: string;
+};
+
 type RoundResult = {
   id: string;
   image: string;
@@ -25,6 +32,7 @@ type RoundResult = {
   };
   distanceKm: number;
   score: number;
+  meta?: RoundMeta;
 };
 
 type SelectedPoint = {
@@ -52,7 +60,7 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Не удалось начать игру.");
+        setError(data.details || data.error || "Не удалось начать игру.");
         return;
       }
 
@@ -61,7 +69,7 @@ export default function Home() {
       setResult(null);
       setSelectedPoint(null);
       setTotalScore(0);
-    } catch (err) {
+    } catch {
       setError("Ошибка запуска игры.");
     } finally {
       setIsLoading(false);
@@ -106,7 +114,7 @@ export default function Home() {
 
       setResult(data);
       setTotalScore((prev) => prev + data.score);
-    } catch (err) {
+    } catch {
       setError("Ошибка отправки ответа.");
     } finally {
       setIsLoading(false);
@@ -123,7 +131,23 @@ export default function Home() {
   const current = rounds[currentIndex];
   const gameFinished = rounds.length > 0 && currentIndex >= rounds.length;
   const canSubmit = !!current && !!selectedPoint && !result && !isLoading;
-
+  const formatDistance = (km: number) => {
+    if (km < 1) {
+      return `${Math.round(km * 1000)} м`;
+    }
+    return `${km.toFixed(2)} км`;
+  };
+  const buttonStyle = {
+    display: "inline-block",
+    padding: "10px 16px",
+    borderRadius: "10px",
+    border: "1px solid #d1d5db",
+    background: "transparent",
+    color: "#ffffff",
+    textDecoration: "none",
+    cursor: "pointer",
+    fontSize: "16px",
+  };
   return (
     <main
       style={{
@@ -141,18 +165,19 @@ export default function Home() {
           gap: "12px",
           alignItems: "center",
           marginBottom: "20px",
+          flexWrap: "wrap",
         }}
       >
-        <button onClick={startGame} disabled={isLoading}>
-          {isLoading ? "Loading..." : "Start Game"}
+        <button onClick={startGame} disabled={isLoading} style={buttonStyle}>
+          {isLoading ? "Загрузка..." : "Начать игру"}
         </button>
 
         {rounds.length > 0 && !gameFinished && (
           <>
             <span>
-              Round: {currentIndex + 1} / {rounds.length}
+              Раунд: {currentIndex + 1} / {rounds.length}
             </span>
-            <span>Total score: {totalScore}</span>
+            <span>Сумма очков: {totalScore}</span>
           </>
         )}
       </div>
@@ -163,13 +188,13 @@ export default function Home() {
 
       {current && !gameFinished && (
         <section style={{ marginTop: "20px" }}>
-          <h2 style={{ marginBottom: "12px" }}>Round {currentIndex + 1}</h2>
+          <h2 style={{ marginBottom: "12px" }}>Раунд {currentIndex + 1}</h2>
 
           {current.image && (
             <div style={{ marginBottom: "16px" }}>
               <img
                 src={`/images/${current.image}`}
-                alt={`Round ${currentIndex + 1}`}
+                alt={`Раунд ${currentIndex + 1}`}
                 style={{
                   width: "100%",
                   maxWidth: "720px",
@@ -181,6 +206,10 @@ export default function Home() {
             </div>
           )}
 
+          <p style={{ marginBottom: "12px" }}>
+            Выбери точку на карте, где сделана фотография!
+          </p>
+
           <MapPicker
             selectedPoint={selectedPoint}
             correctPoint={result?.correct || null}
@@ -188,20 +217,17 @@ export default function Home() {
             onSelect={setSelectedPoint}
           />
 
-          {selectedPoint && (
-            <p style={{ marginTop: "12px" }}>
-              Selected point: {selectedPoint.lat.toFixed(6)},{" "}
-              {selectedPoint.lng.toFixed(6)}
-            </p>
-          )}
-
           {!result && (
             <button
               onClick={submitAnswer}
               disabled={!canSubmit}
-              style={{ marginTop: "16px" }}
+              style={{
+                ...buttonStyle,
+                marginTop: "16px",
+                opacity: canSubmit ? 1 : 0.5,
+              }}
             >
-              {isLoading ? "Submitting..." : "Submit Answer"}
+              {isLoading ? "Проверяем..." : "Отправить ответ"}
             </button>
           )}
         </section>
@@ -216,27 +242,63 @@ export default function Home() {
             borderRadius: "12px",
           }}
         >
-          <h3 style={{ marginTop: 0 }}>Result</h3>
-          <p>Distance: {result.distanceKm} km</p>
-          <p>Score: {result.score}</p>
+          <p>Расстояние: {formatDistance(result.distanceKm)}</p>
           <p>
-            Your point: {result.user.lat}, {result.user.lng}
-          </p>
-          <p>
-            Correct point: {result.correct.lat}, {result.correct.lng}
+            Очки за раунд: {result.score} / {result.maxScore}
           </p>
 
-          <button onClick={nextRound} style={{ marginTop: "12px" }}>
-            Next
+          {result.meta && (
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "16px",
+                border: "1px solid #e5e5e5",
+                borderRadius: "12px",
+                background: "#f3f4f6",
+                color: "#111827",
+              }}
+            >
+              {result.meta.description && (
+                <p
+                  style={{
+                    marginBottom: "12px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {result.meta.description}
+                </p>
+              )}
+
+              {result.meta.place && (
+                <p style={{ marginBottom: "6px" }}>
+                  <strong>Адрес:</strong> {result.meta.place}
+                </p>
+              )}
+
+              {result.meta.year && (
+                <p>
+                  <strong>Год снимка:</strong> {result.meta.year}
+                </p>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={nextRound}
+            style={{ ...buttonStyle, marginTop: "16px" }}
+          >
+            Следующий раунд
           </button>
         </section>
       )}
 
       {gameFinished && (
         <section style={{ marginTop: "24px" }}>
-          <h2>Game finished</h2>
-          <p>Final score: {totalScore}</p>
-          <button onClick={startGame}>Play Again</button>
+          <h2>Игра окончена</h2>
+          <p>Итоговый счёт: {totalScore}</p>
+          <button onClick={startGame} style={buttonStyle}>
+            Сыграть ещё раз
+          </button>
         </section>
       )}
     </main>
