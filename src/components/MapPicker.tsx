@@ -61,7 +61,7 @@ const correctIcon = createPinIcon("#ef4444", "!");
 // 📍 обработка клика
 function ClickHandler({ onSelect }: { onSelect: (point: Point) => void }) {
   useMapEvents({
-    click(event) {
+    click(event: L.LeafletMouseEvent) {
       onSelect({
         lat: event.latlng.lat,
         lng: event.latlng.lng,
