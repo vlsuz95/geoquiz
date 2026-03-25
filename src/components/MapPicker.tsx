@@ -20,8 +20,9 @@ type Point = {
 
 type MapPickerProps = {
   selectedPoint: Point | null;
-  correctPoint?: Point | null;
-  distanceKm?: number | null;
+  correctPoint: Point | null;
+  distanceKm: number | null;
+  isLocked?: boolean;
   onSelect: (point: Point) => void;
 };
 
@@ -64,9 +65,17 @@ function createPinIcon(color: string, symbol: string) {
 const userIcon = createPinIcon("#2563eb", "?");
 const correctIcon = createPinIcon("#ef4444", "!");
 
-function ClickHandler({ onSelect }: { onSelect: (point: Point) => void }) {
+function ClickHandler({
+  onSelect,
+  isLocked,
+}: {
+  onSelect: (point: Point) => void;
+  isLocked: boolean;
+}) {
   useMapEvents({
-    click(event: ClickEvent) {
+    click(event) {
+      if (isLocked) return;
+
       onSelect({
         lat: event.latlng.lat,
         lng: event.latlng.lng,
@@ -107,6 +116,7 @@ export default function MapPicker({
   selectedPoint,
   correctPoint = null,
   distanceKm = null,
+  isLocked = false,
   onSelect,
 }: MapPickerProps) {
   const linePositions: [number, number][] | null =
@@ -138,7 +148,7 @@ export default function MapPicker({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <ClickHandler onSelect={onSelect} />
+        <ClickHandler onSelect={onSelect} isLocked={isLocked} />
         <FitBounds selectedPoint={selectedPoint} correctPoint={correctPoint} />
 
         {selectedPoint && (

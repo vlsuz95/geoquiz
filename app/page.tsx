@@ -232,6 +232,7 @@ export default function Home() {
             selectedPoint={selectedPoint}
             correctPoint={result?.correct || null}
             distanceKm={result?.distanceKm || null}
+            isLocked={!!result}
             onSelect={setSelectedPoint}
           />
 
