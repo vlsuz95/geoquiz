@@ -152,7 +152,30 @@ export default function Home() {
     fontSize: "16px",
     fontWeight: 600,
   };
-
+  const primaryButton: React.CSSProperties = {
+    padding: "12px 24px",
+    borderRadius: "12px",
+    border: "none",
+    background: "#2563eb",
+    color: "white",
+    fontSize: "16px",
+    fontWeight: 600,
+    cursor: "pointer",
+  };
+  const secondaryButton: React.CSSProperties = {
+    padding: "10px 16px",
+    borderRadius: "10px",
+    border: "1px solid ButtonBorder",
+    background: "ButtonFace",
+    color: "ButtonText",
+    fontWeight: 600,
+    cursor: "pointer",
+  };
+  const disabledPrimaryButton: React.CSSProperties = {
+    ...primaryButton,
+    opacity: 0.55,
+    cursor: "not-allowed",
+  };
   const disabledButtonStyle: React.CSSProperties = {
     ...buttonStyle,
     opacity: 0.55,
@@ -162,166 +185,198 @@ export default function Home() {
   return (
     <main
       style={{
-        padding: "24px",
-        fontFamily: "sans-serif",
-        maxWidth: "1000px",
-        margin: "0 auto",
-        background: "Canvas",
-        color: "CanvasText",
         minHeight: "100vh",
+        padding: "32px 16px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        background: "linear-gradient(180deg, Canvas, Canvas 200px, ButtonFace)",
+        color: "CanvasText",
       }}
     >
-      <h1 style={{ marginBottom: "12px" }}>Geo Quiz</h1>
-
       <div
         style={{
-          display: "flex",
-          gap: "12px",
-          alignItems: "center",
-          marginBottom: "20px",
-          flexWrap: "wrap",
+          width: "100%",
+          maxWidth: "900px",
+          background: "Canvas",
+          border: "1px solid ButtonBorder",
+          borderRadius: "16px",
+          padding: "24px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
         }}
       >
-        <button
-          onClick={startGame}
-          disabled={isLoading}
-          style={isLoading ? disabledButtonStyle : buttonStyle}
-        >
-          {isLoading ? "Загрузка..." : "Начать игру"}
-        </button>
+        {/*    <h1 style={{ marginBottom: "24px", textAlign: "center" }}>Geo Quiz</h1> */}
 
+        {rounds.length === 0 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom:
+                rounds.length > 0 && !gameFinished ? "16px" : "24px",
+            }}
+          >
+            <button
+              onClick={startGame}
+              disabled={isLoading}
+              style={isLoading ? disabledPrimaryButton : primaryButton}
+            >
+              {isLoading ? "Загрузка..." : "Начать игру"}
+            </button>
+          </div>
+        )}
         {rounds.length > 0 && !gameFinished && (
-          <>
-            <span>
-              Раунд: {currentIndex + 1} / {rounds.length}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between", // 👈 ключевая строка
+              alignItems: "center",
+              marginBottom: "20px",
+              fontWeight: 500,
+            }}
+          >
+            <span style={{ fontWeight: 600 }}>
+              Раунд {currentIndex + 1} / {rounds.length}
             </span>
-            <span>Сумма очков: {totalScore}</span>
-          </>
+
+            <span>Очки: {totalScore}</span>
+          </div>
+        )}
+
+        {error && (
+          <p
+            style={{
+              color: "crimson",
+              marginBottom: "16px",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </p>
+        )}
+
+        {current && !gameFinished && (
+          <section style={{ marginTop: "20px" }}>
+            {current.image && (
+              <div style={{ marginBottom: "16px" }}>
+                <img
+                  src={`/images/${current.image}`}
+                  alt={`Раунд ${currentIndex + 1}`}
+                  style={{
+                    width: "100%",
+                    maxWidth: "720px",
+                    height: "auto",
+                    borderRadius: "12px",
+                    display: "block",
+                    margin: "0 auto",
+                  }}
+                />
+              </div>
+            )}
+
+            <p style={{ marginBottom: "12px" }}>
+              Выбери точку на карте, где сделана фотография!
+            </p>
+
+            <MapPicker
+              selectedPoint={selectedPoint}
+              correctPoint={result?.correct || null}
+              distanceKm={result?.distanceKm || null}
+              isLocked={!!result}
+              onSelect={setSelectedPoint}
+            />
+
+            {!result && (
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <button
+                  onClick={submitAnswer}
+                  disabled={!canSubmit}
+                  style={
+                    canSubmit
+                      ? { ...secondaryButton, marginTop: "16px" }
+                      : { ...disabledButtonStyle, marginTop: "16px" }
+                  }
+                >
+                  {isLoading ? "Проверяем..." : "Отправить ответ"}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+
+        {result && (
+          <section
+            style={{
+              marginTop: "24px",
+              padding: "16px",
+              border: "1px solid ButtonBorder",
+              borderRadius: "12px",
+              background: "Canvas",
+              color: "CanvasText",
+            }}
+          >
+            <p>Расстояние: {formatDistance(result.distanceKm)}</p>
+            <p>
+              Очки за раунд: {result.score} / {result.maxScore}
+            </p>
+
+            {result.meta && (
+              <div
+                style={{
+                  marginTop: "20px",
+                  padding: "16px",
+                  border: "1px solid ButtonBorder",
+                  borderRadius: "12px",
+                  background: "Field",
+                  color: "FieldText",
+                }}
+              >
+                {result.meta.description && (
+                  <p
+                    style={{
+                      marginBottom: "12px",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {result.meta.description}
+                  </p>
+                )}
+
+                {result.meta.place && (
+                  <p style={{ marginBottom: "6px" }}>
+                    <strong>Адрес:</strong> {result.meta.place}
+                  </p>
+                )}
+
+                {result.meta.year && (
+                  <p>
+                    <strong>Год снимка:</strong> {result.meta.year}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <button
+                onClick={nextRound}
+                style={{ ...secondaryButton, marginTop: "16px" }}
+              >
+                Следующий раунд
+              </button>
+            </div>
+          </section>
+        )}
+
+        {gameFinished && (
+          <section style={{ marginTop: "24px", textAlign: "center" }}>
+            <h2>Игра окончена</h2>
+            <p>Итоговый счёт: {totalScore}</p>
+            <button onClick={startGame} style={primaryButton}>
+              Сыграть ещё раз
+            </button>
+          </section>
         )}
       </div>
-
-      {error && (
-        <p style={{ color: "crimson", marginBottom: "16px" }}>{error}</p>
-      )}
-
-      {current && !gameFinished && (
-        <section style={{ marginTop: "20px" }}>
-          <h2 style={{ marginBottom: "12px" }}>Раунд {currentIndex + 1}</h2>
-
-          {current.image && (
-            <div style={{ marginBottom: "16px" }}>
-              <img
-                src={`/images/${current.image}`}
-                alt={`Раунд ${currentIndex + 1}`}
-                style={{
-                  width: "100%",
-                  maxWidth: "720px",
-                  height: "auto",
-                  borderRadius: "12px",
-                  display: "block",
-                }}
-              />
-            </div>
-          )}
-
-          <p style={{ marginBottom: "12px" }}>
-            Выбери точку на карте, где сделана фотография!
-          </p>
-
-          <MapPicker
-            selectedPoint={selectedPoint}
-            correctPoint={result?.correct || null}
-            distanceKm={result?.distanceKm || null}
-            isLocked={!!result}
-            onSelect={setSelectedPoint}
-          />
-
-          {!result && (
-            <button
-              onClick={submitAnswer}
-              disabled={!canSubmit}
-              style={
-                canSubmit
-                  ? { ...buttonStyle, marginTop: "16px" }
-                  : { ...disabledButtonStyle, marginTop: "16px" }
-              }
-            >
-              {isLoading ? "Проверяем..." : "Отправить ответ"}
-            </button>
-          )}
-        </section>
-      )}
-
-      {result && (
-        <section
-          style={{
-            marginTop: "24px",
-            padding: "16px",
-            border: "1px solid ButtonBorder",
-            borderRadius: "12px",
-            background: "Canvas",
-            color: "CanvasText",
-          }}
-        >
-          <p>Расстояние: {formatDistance(result.distanceKm)}</p>
-          <p>
-            Очки за раунд: {result.score} / {result.maxScore}
-          </p>
-
-          {result.meta && (
-            <div
-              style={{
-                marginTop: "20px",
-                padding: "16px",
-                border: "1px solid ButtonBorder",
-                borderRadius: "12px",
-                background: "Field",
-                color: "FieldText",
-              }}
-            >
-              {result.meta.description && (
-                <p
-                  style={{
-                    marginBottom: "12px",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {result.meta.description}
-                </p>
-              )}
-
-              {result.meta.place && (
-                <p style={{ marginBottom: "6px" }}>
-                  <strong>Адрес:</strong> {result.meta.place}
-                </p>
-              )}
-
-              {result.meta.year && (
-                <p>
-                  <strong>Год снимка:</strong> {result.meta.year}
-                </p>
-              )}
-            </div>
-          )}
-
-          <button
-            onClick={nextRound}
-            style={{ ...buttonStyle, marginTop: "16px" }}
-          >
-            Следующий раунд
-          </button>
-        </section>
-      )}
-
-      {gameFinished && (
-        <section style={{ marginTop: "24px" }}>
-          <h2>Игра окончена</h2>
-          <p>Итоговый счёт: {totalScore}</p>
-          <button onClick={startGame} style={buttonStyle}>
-            Сыграть ещё раз
-          </button>
-        </section>
-      )}
     </main>
   );
 }
