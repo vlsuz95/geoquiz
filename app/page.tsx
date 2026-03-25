@@ -132,23 +132,33 @@ export default function Home() {
   const current = rounds[currentIndex];
   const gameFinished = rounds.length > 0 && currentIndex >= rounds.length;
   const canSubmit = !!current && !!selectedPoint && !result && !isLoading;
+
   const formatDistance = (km: number) => {
     if (km < 1) {
       return `${Math.round(km * 1000)} м`;
     }
     return `${km.toFixed(2)} км`;
   };
-  const buttonStyle = {
+
+  const buttonStyle: React.CSSProperties = {
     display: "inline-block",
     padding: "10px 16px",
     borderRadius: "10px",
-    border: "1px solid #d1d5db",
-    background: "transparent",
-    color: "#ffffff",
+    border: "1px solid ButtonBorder",
+    background: "ButtonFace",
+    color: "ButtonText",
     textDecoration: "none",
     cursor: "pointer",
     fontSize: "16px",
+    fontWeight: 600,
   };
+
+  const disabledButtonStyle: React.CSSProperties = {
+    ...buttonStyle,
+    opacity: 0.55,
+    cursor: "not-allowed",
+  };
+
   return (
     <main
       style={{
@@ -156,6 +166,9 @@ export default function Home() {
         fontFamily: "sans-serif",
         maxWidth: "1000px",
         margin: "0 auto",
+        background: "Canvas",
+        color: "CanvasText",
+        minHeight: "100vh",
       }}
     >
       <h1 style={{ marginBottom: "12px" }}>Geo Quiz</h1>
@@ -169,7 +182,11 @@ export default function Home() {
           flexWrap: "wrap",
         }}
       >
-        <button onClick={startGame} disabled={isLoading} style={buttonStyle}>
+        <button
+          onClick={startGame}
+          disabled={isLoading}
+          style={isLoading ? disabledButtonStyle : buttonStyle}
+        >
           {isLoading ? "Загрузка..." : "Начать игру"}
         </button>
 
@@ -222,11 +239,11 @@ export default function Home() {
             <button
               onClick={submitAnswer}
               disabled={!canSubmit}
-              style={{
-                ...buttonStyle,
-                marginTop: "16px",
-                opacity: canSubmit ? 1 : 0.5,
-              }}
+              style={
+                canSubmit
+                  ? { ...buttonStyle, marginTop: "16px" }
+                  : { ...disabledButtonStyle, marginTop: "16px" }
+              }
             >
               {isLoading ? "Проверяем..." : "Отправить ответ"}
             </button>
@@ -239,8 +256,10 @@ export default function Home() {
           style={{
             marginTop: "24px",
             padding: "16px",
-            border: "1px solid #ccc",
+            border: "1px solid ButtonBorder",
             borderRadius: "12px",
+            background: "Canvas",
+            color: "CanvasText",
           }}
         >
           <p>Расстояние: {formatDistance(result.distanceKm)}</p>
@@ -253,10 +272,10 @@ export default function Home() {
               style={{
                 marginTop: "20px",
                 padding: "16px",
-                border: "1px solid #e5e5e5",
+                border: "1px solid ButtonBorder",
                 borderRadius: "12px",
-                background: "#f3f4f6",
-                color: "#111827",
+                background: "Field",
+                color: "FieldText",
               }}
             >
               {result.meta.description && (
