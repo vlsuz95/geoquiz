@@ -1,18 +1,58 @@
 import { selectRounds } from "@/src/selectRounds";
 
-export async function GET() {
-  try {
-    const rounds = selectRounds(5);
+function parseMode(searchParams) {
+  const type = searchParams.get("type");
 
-    const safeRounds = rounds.map((r) => ({
-      id: String(r.id),
-      image: String(r.image_name || "").trim(),
+  if (type === "daily") {
+    return { type: "daily" };
+  }
+
+  if (type === "category") {
+    return {
+      type: "category",
+      category: String(searchParams.get("category") || "")
+        .trim()
+        .toLowerCase(),
+    };
+  }
+
+  if (type === "difficulty") {
+    return {
+      type: "difficulty",
+      difficulty: Number(searchParams.get("difficulty")),
+    };
+  }
+
+  if (type === "decade") {
+    return {
+      type: "decade",
+      decadeStart: Number(searchParams.get("decadeStart")),
+    };
+  }
+
+  return { type: "default" };
+}
+
+export async function GET(request) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const mode = parseMode(searchParams);
+
+    const rounds = selectRounds({
+      mode,
+      count: 5,
+    });
+
+    const safeRounds = rounds.map((round) => ({
+      id: String(round.id),
+      image: String(round.image_name || "").trim(),
     }));
 
-    return Response.json({ rounds: safeRounds });
+    return Response.json({
+      rounds: safeRounds,
+      mode,
+    });
   } catch (error) {
-    console.error("start-game error:", error);
-
     return Response.json(
       {
         error: "Не удалось подготовить игру",

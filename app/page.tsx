@@ -51,13 +51,32 @@ export default function Home() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [totalScore, setTotalScore] = useState(0);
+  const [screen, setScreen] = useState<"menu" | "game">("menu");
 
-  async function startGame() {
+  const [menuStep, setMenuStep] = useState<
+    "root" | "category" | "difficulty" | "decade"
+  >("root");
+
+  async function startGame(params?: {
+    type: "daily" | "category" | "difficulty" | "decade";
+    category?: string;
+    difficulty?: number;
+    decadeStart?: number;
+  }) {
     try {
       setIsLoading(true);
       setError("");
 
-      const res = await fetch("/api/start-game");
+      const query = new URLSearchParams();
+
+      if (params?.type) query.set("type", params.type);
+      if (params?.category) query.set("category", params.category);
+      if (params?.difficulty)
+        query.set("difficulty", String(params.difficulty));
+      if (params?.decadeStart)
+        query.set("decadeStart", String(params.decadeStart));
+
+      const res = await fetch(`/api/start-game?${query.toString()}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -70,6 +89,8 @@ export default function Home() {
       setResult(null);
       setSelectedPoint(null);
       setTotalScore(0);
+      setMenuStep("root");
+      setScreen("game");
     } catch {
       setError("Ошибка запуска игры.");
     } finally {
@@ -181,7 +202,37 @@ export default function Home() {
     opacity: 0.55,
     cursor: "not-allowed",
   };
+  const errorCard: React.CSSProperties = {
+    marginTop: "16px",
+    marginBottom: "16px",
+    padding: "14px 16px",
+    borderRadius: "12px",
+    border: "1px solid rgba(220, 38, 38, 0.25)",
+    background: "rgba(220, 38, 38, 0.08)",
+    color: "#b91c1c",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "10px",
+    lineHeight: 1.5,
+  };
 
+  const errorIcon: React.CSSProperties = {
+    flexShrink: 0,
+    width: "24px",
+    height: "24px",
+    borderRadius: "999px",
+    background: "rgba(220, 38, 38, 0.14)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "14px",
+    fontWeight: 700,
+  };
+
+  const errorText: React.CSSProperties = {
+    margin: 0,
+    flex: 1,
+  };
   return (
     <main
       style={{
@@ -207,29 +258,157 @@ export default function Home() {
       >
         {/*    <h1 style={{ marginBottom: "24px", textAlign: "center" }}>Geo Quiz</h1> */}
 
-        {rounds.length === 0 && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom:
-                rounds.length > 0 && !gameFinished ? "16px" : "24px",
-            }}
-          >
-            <button
-              onClick={startGame}
-              disabled={isLoading}
-              style={isLoading ? disabledPrimaryButton : primaryButton}
-            >
-              {isLoading ? "Загрузка..." : "Начать игру"}
-            </button>
+        {screen === "menu" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {menuStep === "root" && (
+              <>
+                <button
+                  onClick={() => startGame({ type: "daily" })}
+                  disabled={isLoading}
+                  style={isLoading ? disabledPrimaryButton : primaryButton}
+                >
+                  {isLoading ? "Загрузка..." : "Ежедневный режим"}
+                </button>
+
+                <button
+                  onClick={() => setMenuStep("category")}
+                  style={secondaryButton}
+                >
+                  По категориям
+                </button>
+
+                <button
+                  onClick={() => setMenuStep("difficulty")}
+                  style={secondaryButton}
+                >
+                  По сложности
+                </button>
+
+                <button
+                  onClick={() => setMenuStep("decade")}
+                  style={secondaryButton}
+                >
+                  По десятилетиям
+                </button>
+              </>
+            )}
+
+            {menuStep === "category" && (
+              <>
+                <p style={{ margin: "0 0 4px 0", fontWeight: 600 }}>
+                  Режим: по категориям
+                </p>
+                <p style={{ marginTop: 0 }}>
+                  Выбери тематический набор фотографий:
+                </p>
+
+                <button
+                  onClick={() =>
+                    startGame({ type: "category", category: "tramway" })
+                  }
+                  style={secondaryButton}
+                >
+                  Трамваи
+                </button>
+
+                <button
+                  onClick={() =>
+                    startGame({ type: "category", category: "street" })
+                  }
+                  style={secondaryButton}
+                >
+                  Улицы
+                </button>
+
+                <button
+                  onClick={() =>
+                    startGame({ type: "category", category: "trolleybus" })
+                  }
+                  style={secondaryButton}
+                >
+                  Троллейбусы
+                </button>
+
+                <button
+                  onClick={() =>
+                    startGame({ type: "category", category: "railway" })
+                  }
+                  style={secondaryButton}
+                >
+                  Железная дорога
+                </button>
+
+                <button
+                  onClick={() => setMenuStep("root")}
+                  style={secondaryButton}
+                >
+                  Назад
+                </button>
+              </>
+            )}
+
+            {menuStep === "difficulty" && (
+              <>
+                <p style={{ margin: "0 0 4px 0", fontWeight: 600 }}>
+                  Режим: по сложности
+                </p>
+                <p style={{ marginTop: 0 }}>
+                  Выбери уровень сложности от 1 до 5.
+                </p>
+
+                {[1, 2, 3, 4, 5].map((difficulty) => (
+                  <button
+                    key={difficulty}
+                    onClick={() =>
+                      startGame({ type: "difficulty", difficulty })
+                    }
+                    style={secondaryButton}
+                  >
+                    Сложность {difficulty}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setMenuStep("root")}
+                  style={secondaryButton}
+                >
+                  Назад
+                </button>
+              </>
+            )}
+
+            {menuStep === "decade" && (
+              <>
+                <p style={{ margin: "0 0 4px 0", fontWeight: 600 }}>
+                  Режим: по десятилетиям
+                </p>
+                <p style={{ marginTop: 0 }}>Выбери десятилетие:</p>
+
+                {[1990, 2000].map((decadeStart) => (
+                  <button
+                    key={decadeStart}
+                    onClick={() => startGame({ type: "decade", decadeStart })}
+                    style={secondaryButton}
+                  >
+                    {decadeStart}-е
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setMenuStep("root")}
+                  style={secondaryButton}
+                >
+                  Назад
+                </button>
+              </>
+            )}
           </div>
         )}
-        {rounds.length > 0 && !gameFinished && (
+        {screen === "game" && rounds.length > 0 && !gameFinished && (
           <div
             style={{
               display: "flex",
-              justifyContent: "space-between", // 👈 ключевая строка
+              justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "20px",
               fontWeight: 500,
@@ -244,18 +423,13 @@ export default function Home() {
         )}
 
         {error && (
-          <p
-            style={{
-              color: "crimson",
-              marginBottom: "16px",
-              textAlign: "center",
-            }}
-          >
-            {error}
-          </p>
+          <div style={errorCard} role="alert" aria-live="polite">
+            <div style={errorIcon}>!</div>
+            <p style={errorText}>{error}</p>
+          </div>
         )}
 
-        {current && !gameFinished && (
+        {screen === "game" && current && !gameFinished && (
           <section style={{ marginTop: "20px" }}>
             {current.image && (
               <div style={{ marginBottom: "16px" }}>
@@ -304,7 +478,7 @@ export default function Home() {
           </section>
         )}
 
-        {result && (
+        {screen === "game" && result && (
           <section
             style={{
               marginTop: "24px",
@@ -367,12 +541,24 @@ export default function Home() {
           </section>
         )}
 
-        {gameFinished && (
+        {screen === "game" && gameFinished && (
           <section style={{ marginTop: "24px", textAlign: "center" }}>
             <h2>Игра окончена</h2>
             <p>Итоговый счёт: {totalScore}</p>
-            <button onClick={startGame} style={primaryButton}>
-              Сыграть ещё раз
+            <button
+              onClick={() => {
+                setRounds([]);
+                setCurrentIndex(0);
+                setResult(null);
+                setSelectedPoint(null);
+                setTotalScore(0);
+                setError("");
+                setMenuStep("root");
+                setScreen("menu");
+              }}
+              style={primaryButton}
+            >
+              В меню режимов
             </button>
           </section>
         )}
